@@ -1,4 +1,5 @@
 from typing import Any, Dict, cast, Union, TypeVar
+from pydantic import ValidationError
 from rune_forge.exceptions import (
     CircularDependencyError,
     ImplementationNotFoundError,
@@ -55,9 +56,9 @@ class Grimoire:
         service_config = self.config[name]
         implementation_name = service_config.use
         full_impl_key = f"{name}.{implementation_name}"
-        impl_conf = dict(service_config.implementations[implementation_name])
+        impl_conf = service_config.implementations[implementation_name]
 
-        class_path = impl_conf.pop("class", None)
+        class_path = impl_conf.class_
         impl_class = EXPLICIT_REGISTRY.get(full_impl_key)
         if impl_class is None:
             if not class_path:
@@ -67,13 +68,13 @@ class Grimoire:
             impl_class = import_from_path(class_path)
 
         # Resolve dependencies
-        deps = impl_conf.pop("depends_on", {})
+        deps = impl_conf.depends_on
         resolved_deps = {
             dep_name: self.get_service(dep_key) for dep_name, dep_key in deps.items()
         }
 
         try:
-            instance = impl_class(**impl_conf, **resolved_deps)
+            instance = impl_class(**impl_conf.class_kwargs, **resolved_deps)
         except ValidationError as e:
             raise InvalidServiceConfigError(f"Config error in '{full_impl_key}':\n{e}")
 

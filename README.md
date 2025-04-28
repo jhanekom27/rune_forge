@@ -102,20 +102,25 @@ service2:
   use: default
   implementations:
     default:
-      paramX: "world"
+      class_kwargs:
+        paramX: "world"
 
 service3:
   use: default
   implementations:
     default:
-      paramY: "!"
+      class_kwargs:
+        paramY: "!"
 ```
 
-Each Rune specifies:
+Each top-level key (e.g., `service1`) defines a Rune. Inside each Rune:
 
-- The implementation to use (`use:`).
-- Constructor parameters.
-- Dependencies via `depends_on`.
+- `use:` specifies which implementation under `implementations:` should be used when this Rune is summoned.
+- `implementations:` is a dictionary where each key is an implementation name (e.g., `concrete1`, `default`).
+  - Inside each implementation:
+    - `class:` (Optional) The full Python path to the implementation class (e.g., `my_module.MyClass`). This is needed if the class isn't registered using `@inscribe`.
+    - `depends_on:` (Optional) A dictionary mapping constructor argument names to the keys of other Runes they depend on.
+    - Any other keys (like `param1`, `paramX`, `paramY` in the example) are treated as keyword arguments (`class_kwargs`) passed to the implementation's constructor.
 
 ### 4. Build and Summon Services from the Grimoire
 
