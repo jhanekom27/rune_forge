@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 T = TypeVar("T")
 
 
-class ServiceContainer:
+class Grimoire:
     def __init__(
         self, config: ServicesConfig, type_hints: Dict[ServiceKey, type] | None = None
     ):
