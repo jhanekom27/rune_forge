@@ -1,15 +1,17 @@
 from typing import Any, Dict, cast, Union, TypeVar
-from backend.di_lite.container import ServicesConfig, logger
-from backend.di_lite.decorators import EXPLICIT_REGISTRY
-from backend.di_lite.exceptions import (
+from rune_forge.exceptions import (
     CircularDependencyError,
     ImplementationNotFoundError,
     InvalidServiceConfigError,
     ServiceNotFoundError,
+)
+from rune_forge.grimoire_config import GrimoireConfig
+from rune_forge.decorators import EXPLICIT_REGISTRY
+from rune_forge.exceptions import (
     ServiceTypeMismatchError,
 )
-from backend.di_lite.loader import import_from_path
-from backend.di_lite.service_keys import ServiceKey
+from rune_forge.utilities import import_from_path
+from rune_forge.grimoire_config import RuneKey
 import logging
 
 
@@ -23,14 +25,14 @@ T = TypeVar("T")
 
 class Grimoire:
     def __init__(
-        self, config: ServicesConfig, type_hints: Dict[ServiceKey, type] | None = None
+        self, config: GrimoireConfig, type_hints: Dict[RuneKey, type] | None = None
     ):
-        self.config = config.services
+        self.config = config.runes
         self.instances: Dict[str, Any] = {}
         self.resolving: set[str] = set()
         self.type_hints = type_hints
 
-    def get_service(self, key: Union[str, ServiceKey]) -> Any:
+    def get_service(self, key: Union[str, RuneKey]) -> Any:
         if isinstance(key, Enum):
             name = key.value
         else:
@@ -79,7 +81,7 @@ class Grimoire:
         print(f"[Wired] {name} -> {full_impl_key}")
         return instance
 
-    def get_typed(self, key: ServiceKey) -> T:
+    def get_typed(self, key: RuneKey) -> T:
         instance = self.get_service(key.value)
         expected_type = self.type_hints.get(key)
         if expected_type and not isinstance(instance, expected_type):
