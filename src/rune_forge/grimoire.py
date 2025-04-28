@@ -33,7 +33,7 @@ class Grimoire:
         self.resolving: set[str] = set()
         self.type_hints = type_hints
 
-    def get_service(self, key: Union[str, RuneKey]) -> Any:
+    def summon(self, key: Union[str, RuneKey]) -> Any:
         if isinstance(key, Enum):
             name = key.value
         else:
@@ -70,7 +70,7 @@ class Grimoire:
         # Resolve dependencies
         deps = impl_conf.depends_on
         resolved_deps = {
-            dep_name: self.get_service(dep_key) for dep_name, dep_key in deps.items()
+            dep_name: self.summon(dep_key) for dep_name, dep_key in deps.items()
         }
 
         try:
@@ -83,8 +83,8 @@ class Grimoire:
         logger.info(f"Successfully wired service: '{name}' -> {full_impl_key}")
         return instance
 
-    def get_typed(self, key: RuneKey) -> T:
-        instance = self.get_service(key.value)
+    def summon_typed(self, key: RuneKey) -> T:
+        instance = self.summon(key.value)
         expected_type = self.type_hints.get(key)
         if expected_type and not isinstance(instance, expected_type):
             raise ServiceTypeMismatchError(
@@ -92,13 +92,13 @@ class Grimoire:
             )
         return cast(T, instance)
 
-    def build_all(self):
+    def summon_all(self):
         for name in self.config:
             logger.info(f"Building service: {name}")
-            self.get_service(name)
+            self.summon(name)
 
     # Optional accessors
     def __getattr__(self, name: str) -> Any:
         if name in self.config:
-            return self.get_service(name)
+            return self.summon(name)
         raise AttributeError(f"'ServiceContainer' has no service named '{name}'")

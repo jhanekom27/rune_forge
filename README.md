@@ -131,7 +131,7 @@ from rune_forge import Grimoire
 grimoire = Grimoire(MyGrimoireConfig())
 
 # Summon a service by key
-service1 = grimoire.get_service("service1")
+service1 = grimoire.summon("service1")
 print(service1.do_something())
 
 # Or use attribute access (if key is a valid Python identifier)
@@ -140,20 +140,20 @@ print(grimoire.service1.do_something())
 
 - Runes are lazily built on demand.
 - Dependencies are auto-resolved recursively.
-- You can call `grimoire.build_all()` to build all Runes eagerly if needed.
+- You can call `grimoire.summon_all()` to build all Runes eagerly if needed.
 
 ## Advanced Features
 
 - **Circular Dependency Detection**: Raises an error if a dependency loop is detected during summoning.
 - **Explicit Registry**: Services can be manually registered with `@inscribe` or dynamically resolved by class path.
-- **Typed Access**: Using `get_typed()` ensures your summoned instance matches the expected type.
+- **Typed Access**: Using `summon_typed()` ensures your summoned instance matches the expected type.
 
 ```python
 from rune_forge import RuneKey # Assuming RuneKey enum/class exists for type hints
 
-service1 = grimoire.get_typed(RuneKey.service1) # Example if using an Enum/Constant for keys
+service1 = grimoire.summon_typed(RuneKey.service1) # Example if using an Enum/Constant for keys
 # Or using the abstract base class
-service1_typed = grimoire.get_typed(Service1)
+service1_typed = grimoire.summon_typed(Service1)
 ```
 
 ## Philosophy
