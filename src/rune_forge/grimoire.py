@@ -37,9 +37,10 @@ class Grimoire:
             name = key.value
         else:
             name = str(key)
-        print(f"[get_service] {name}")
+        logger.info(f"Requesting service: '{name}'")
 
         if name in self.instances:
+            logger.info(f"Returning existing instance for service: '{name}'")
             return self.instances[name]
 
         if name in self.resolving:
@@ -78,7 +79,7 @@ class Grimoire:
 
         self.instances[name] = instance
         self.resolving.remove(name)
-        print(f"[Wired] {name} -> {full_impl_key}")
+        logger.info(f"Successfully wired service: '{name}' -> {full_impl_key}")
         return instance
 
     def get_typed(self, key: RuneKey) -> T:
